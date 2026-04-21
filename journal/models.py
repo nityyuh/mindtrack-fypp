@@ -13,15 +13,28 @@ class JournalEntry (models.Model):
     def __str__(self):
         return f"entry by {self.user.username} on {self.created_at}"
 
+class Deadline(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    title = models.CharField(max_length=200)
+    due_date = models.DateField()
+
+    def __str__(self):
+        return f"{self.title} - {self.due_date}"
+
+
 
 class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+
     THEME_CHOICES = [
-        ('light','Light'),
-        ('dark','Dark'),
-        ('pastel','Pastel'),
+        ('light','☁️ daylight'),
+        ('dark','🌑 midnight'),
+        ('pastel','🌸 blossom'),
     ]
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     theme = models.CharField(max_length=20, choices=THEME_CHOICES, default='light')
+
+    reminder_enabled = models.BooleanField(default=False)
 
     def __str__(self):
         return self.user.username
@@ -30,3 +43,4 @@ class Profile(models.Model):
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
         Profile.objects.create(user=instance)
+

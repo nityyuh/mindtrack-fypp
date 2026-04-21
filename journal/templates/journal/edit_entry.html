@@ -1,0 +1,17 @@
+{% extends "journal/base.html" %}
+
+{% block content %}
+
+<div class="entry-page">
+    <h2> edit my entry </h2>
+
+    <form method="post" class="entry-form">
+        {% csrf_token %}
+        <textarea name="content"> {{ entry.content }} </textarea>
+        <div class="entry-actions">
+            <button type="submit" class="btn"> save changes </button>
+            <a href="{% url 'view_entry' entry.id %}" class="btn secondary"> stop editing </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

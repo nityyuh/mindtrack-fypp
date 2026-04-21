@@ -1,0 +1,26 @@
+{% extends "journal/base.html" %}
+
+{% block content %}
+
+<h2> my journal entries 📖 </h2>
+
+<div class="entries-grid">
+    {% for entry in entries %}
+  <div class="entry-card">
+    <p><strong>{{ entry.created_at|date:"M d, Y" }}</strong></p>
+    <p>{{ entry.content|truncatewords:20 }}</p>
+    <span class="pill">
+      {{ entry.sentiment_label }}
+      ({{ entry.sentiment_score|floatformat:2}})
+    </span>
+    <a href="{% url 'view_entry' entry.id %}" class="btn">view</a>
+  </div>
+
+{% empty %}
+  <p class="empty-text">
+    you haven't written any entries yet. write your first one today! 🌱
+  </p>
+{% endfor %}
+    
+</div>
+{% endblock %}

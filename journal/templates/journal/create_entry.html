@@ -1,49 +1,46 @@
-{% load static %}
-<!DOCTYPE html>
+{% extends "journal/base.html" %}
 
-<html>
-<div class="container">
-<head>
-    <title> new journal entry </title>
-    <link rel="stylesheet" href="{% static 'journal/style.css' %}">
-</head>
-<body class="{% if user.is_authenticated %}{{ user.profile.theme }}{% else %}light{% endif %}">
+{% block content %}
 
-    <a href="{% url 'home' %}">
-        <button style="margin-bottom:10px;"> 🏠 home</button>
-    </a>
-    <a href="{% url 'create_entry' %}">
-        <button style="margin-bottom:10px;"> 📝 new entry</button>
-    </a>
-    <a href="{% url 'logout' %}">
-        <button style="margin-bottom:10px;"> 🚪 log out</button>
-    </a>
-    <a href="{% url 'dashboard' %}">
-        <button style="margin-bottom: 10px;"> my dashboard </button>
-    </a>
-    <h2> new journal entry </h2>
+<div class="entry-page">
+    <h2 class="entry-title"> new journal entry</h2>
+    <p class="gentle-text"> this is your space - write freely, no pressure</p>
 
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit"> save entry </button>
-    </form>
+    <div class="mood-section">
+        <div class="mood-picker">
+            <div class="mood" onclick="selectMood(this,'happy')">☺️</div>
+            <div class="mood" onclick="selectMood(this, 'neutral')">🙂</div>
+            <div class="mood" onclick="selectMood(this, 'sad')">☹️</div>
+            <div class="mood" onclick="selectMood(this, 'stressed')">😣</div>
+        </div>
 
-    <h3> your entries </h3>
-    <ul>
-        {% for entry in entries %}
-        <li>
-            <strong> {{ entry.created_at}}</strong> <br>
-            {{ entry.content }} <br>
-            <em> sentiment: {{ entry.sentiment_label }} ({{ entry.sentiment_score}})</em>
-        </li>
-    {% empty %}
-    <li> no entries yet </li>
-    {% endfor %}
+        <input type="hidden" name="mood" id="mood-input">
 
-    </ul>
+    </div>
 
-    <p><a href="/admin/"> admin </a></p>
-</body>
-</div>
-</html>
+        <form method="post" class="entry-form">
+            {% csrf_token %}
+
+            <textarea name="content" placeholder="write about your day.." required></textarea>
+            <div class="entry-actions">
+                <button type="submit" class="btn"> save entry </button>
+                <a href="{% url 'dashboard' %}" class="btn secondary"> back to dashboard </a>
+            </div>
+        </form>
+
+
+    </div>
+    <script>
+        function selectMood(el, mood) {
+            document.querySelectorAll('.mood').forEach(m => m.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('mood-input').value = mood;
+        }
+
+        function usePrompt(el) {
+            const textarea = document.querySelector("textarea");
+            textarea.value = el.innerText + " ";
+            textarea.focus();
+        }
+    </script>
+    {% endblock %}

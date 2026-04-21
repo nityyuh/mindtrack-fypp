@@ -1,18 +1,126 @@
 {% load static %}
 <!DOCTYPE html>
 <html>
+
 <head>
   <title>settings | mindtrack</title>
   <link rel="stylesheet" href="{% static 'journal/style.css' %}">
 </head>
 
 <body class="{% if user.is_authenticated %}{{ user.profile.theme }}{% else %}light{% endif %}">
-  <div class="page-center">
-    <div class="container">
+  <div class="main-content">
+    <div class="settings-pag">
       <h2>settings ⚙️</h2>
-      <p class="subtitle">theme editing coming next.</p>
-      <a href="{% url 'dashboard' %}"><button>back to dashboard</button></a>
+ 
+      <form method="post" id="settings-form">
+        {% csrf_token %}
+        <h3> profile</h3>
+        <div class="setting-row">
+          <span><strong> username: </strong> {{user.username}}</span>
+          <button type="button" class="small-btn"onclick="toggleEdit('username')"> change my username</button>
+        </div>
+        <div id="edit-username" class="edit-box">
+          <input type="text" name="username" placeholder="new username">
+          <button type="button" class="small-btn" onclick="showConfirm('username')"> save changes</button>
+        </div>
+        <div class="setting-row">
+          <span><strong> email:</strong>{{user.email}}</span>
+          <button type="button" class="small-btn"onclick="toggleEdit('email')"> change my email</button>
+        </div>
+        <div id="edit-email" class="edit-box">
+          <input type="email" name="email" placeholder="new email">
+          <button type="button" class="small-btn" onclick="showConfirm('email')"> save changes</button>
+        </div>
+        <br>
+        <a href="{% url 'change_password' %}" class="btn s"> change password </a>
+        <br> <br>
+        <hr>
+        <h3> theme </h3>
+        <p class="subtitle"> choose your vibe </p>
+        <div class="theme-picker">
+          <div class="theme-card light {% if user.profile.theme == 'light' %}active{% endif %}" id="theme-light"
+            onclick="selectTheme('light')">
+            ☁️ daylight
+          </div>
+          <div class="theme-card dark {% if user.profile.theme == 'dark' %} active {% endif %}" id="theme-dark"
+            onclick="selectTheme('dark')">
+            🌑 midnight
+          </div>
+          <div class="theme-card pastel {% if user.profile.theme == 'pastel' %} active {% endif %}" id="theme-pastel"
+            onclick="selectTheme('pastel')">
+            🌸 blossom
+          </div>
+        </div>
+        <input type="hidden" name="theme" id="id_theme" value="{{ user.profile.theme}}">
+        <button type="submit" class="small-btn"> save settings </button>
+        <hr>
+
+        <h3> notification 🔔 </h3>
+        <div class="toggle-row">
+          <span> daily journal reminder </span>
+          <label class="switch">
+            <input type="checkbox" name="reminder" {% if user.profile.reminder_enabled %} checked {% endif %}>
+            <span class="slider"></span>
+          </label>
+        </div>
+        <br>   
+      </form>
+      <br>
+      <a href="{% url 'dashboard' %}"><button class="small-btn">back to dashboard</button></a>
     </div>
   </div>
+
+  <div id="confirm-box" class="confirm-box">
+    <p id="confirm-text"></p>
+    <div class="confirm-actions">
+      <button class="small-btn" onclick="submitForm()"> yes </button>
+      <button class="small-btn" onclick="closeConfirm()"> cancel </button>
+    </div>
+  </div>
+
+  <script>
+    function selectTheme(theme) {
+      document.body.classList.remove('light','dark','pastel');
+      document.body.classList.add(theme);
+
+      document.querySelectorAll('.theme-card').forEach(card => {
+        card.classList.remove('active');
+      });
+      document.getElementById(`theme-${theme}`).classList.add('active');
+      document.getElementById('id_theme').value = theme; 
+    }
+
+    function toggleEdit(field){
+      const box = document.getElementById("edit-" + field)
+
+      if(box.style.display === "block"){
+        box.style.display = "none";
+      } else {
+        box.style.display = "block";
+      }
+    }
+
+    function showConfirm(type) {
+      const text = document.getElementById("confirm-text");
+
+      if(type === "username") {
+        text.innerText = "are you sure you want to change your username?";
+      } else if (type === "email") {
+        text.innerText = "are you sure you want to change your email?"
+      }
+      document.getElementById("confirm-box").style.display = "block";
+    }
+    
+    function closeConfirm() {
+      document.getElementById("confirm-box").style.display = "none";
+    }
+
+    function submitForm() {
+      document.querySelector("form").submit();
+    }
+  </script>
+
+  
 </body>
+
 </html>

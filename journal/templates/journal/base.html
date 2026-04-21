@@ -1,0 +1,83 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="{% static 'journal/style.css' %}">
+</head>
+
+<body class="{% if user.is_authenticated %}{{ request.user.profile.theme}}{% else %} light {% endif %}">
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <h2> MindTrack 💗 </h2>
+        </div>
+        <div class="nav-right">
+            {% if user.is_authenticated %}
+            <a href="{% url 'dashboard' %}" class="nav-link"> my dashboard </a>
+            <a href="{% url 'create_entry' %}" class="nav-link"> new entry </a>
+            <a href="{% url 'insights' %}" class="nav-link"> insights </a>
+            <a href="{% url 'settings' %}" class="nav-link"> settings ⚙️ </a>
+ 
+            <button type="button" class="nav-link" onclick="openLogout()"> logout </button>
+            
+            <form method="post" action="{% url 'logout' %}" id="logout-form" style="display: inline;">
+                {% csrf_token %}
+            </form>
+            {% else %}
+            <a href="{% url 'login' %}" class="nav-link"> login </a>
+            <a href="{% url 'register' %}" class="nav-link"> register </a>
+            {% endif %}
+        </div>
+    </nav>
+    <!-- PAGE CONTENT -->
+    <div class="main-content">
+        {% block content %} {% endblock %}
+    </div>
+    <div id="logout-popup" class="confirm-box" style="display: none;">
+        <p> are you sure you want to log out? </p>
+        <div class="confirm-actions">
+            <button class="small-btn" onclick="confirmLogout()"> yes, log out </button>
+            <button class="small-btn" onclick="closeLogout()"> no, i'd like to stay </button>
+        </div>
+    </div>
+
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="message {{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+   
+</body>
+<script>
+    function openLogout() {
+        document.getElementById("logout-popup").style.display = "block";
+    }
+
+    function closeLogout() {
+        document.getElementById("logout-popup").style.display = "none";
+    }
+
+    function confirmLogout() {
+        document.getElementById("logout-form").submit();
+    }
+
+    setTimeout(() => {
+        document.querySelectorAll('.message').forEach(msg => {
+            msg.style.transition = "opacity 0.4s ease, transform 0.4s ease";
+            msg.style.opacity = "0";
+            msg.style.transform = "translateY(-10px)";
+
+            setTimeout(() => msg.remove(),400);
+        });
+    }, 3000);
+
+
+</script>
+
+</html>

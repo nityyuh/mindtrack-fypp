@@ -1,0 +1,78 @@
+{% extends "journal/base.html" %}
+
+{% block content %}
+
+<div class="entry-page">
+
+    <div class="entry-wrapper">
+
+        <h2>journal entry 💌</h2>
+
+        <p><strong>date:</strong> {{ entry.created_at }}</p>
+
+        <p>
+            <strong>sentiment:</strong>
+            {% if entry.sentiment_label == "positive" %}
+            😚 positive
+            {% elif entry.sentiment_label == "negative" %}
+            😞 negative
+            {% else %}
+            😐 neutral
+            {% endif %}
+
+            
+            ({{ entry.sentiment_score|floatformat:2 }})
+            
+        </p>
+
+        <div class="entry-full">
+            {{ entry.content }}
+        </div>
+        
+            <div class="entry-actions">
+                <a href="{% url 'edit_entry' entry.id %}" class="action-btn">edit</a>
+                <button type="button" class="action-btn delete" onclick="openDelete({{entry.id}})"> delete </button>
+                <form method="post" action="{% url 'delete_entry' entry.id %}" id="delete-form-{{entry.id}}"
+                    style="margin-top: 10px;">
+                    {% csrf_token %}
+                </form>
+            </div>
+
+                <div id="delete-popup" class="confirm-box" style="display: none;">
+                    <p> are you sure you want to delete this entry? </p>
+
+                    <div class="confirm-actions">
+                        <button class="small-btn" onclick="confirmDelete()"> yes, delete </button>
+                        <button class="small-btn" onclick="closeDelete()"> no, i would not like to delete </button>
+                    </div>
+                </div>
+            </div>
+            <br>
+        
+
+      
+        
+
+    </div>
+
+</div>
+<script>
+    let selectedDateEntry = null;
+
+    function openDelete(id){
+        selectedDateEntry = id;
+        document.getElementById("delete-popup").style.display = "block";
+    }
+
+    function closeDelete(){
+        document.getElementById("delete-popup").style.display = "none";
+    }
+
+    function confirmDelete() {
+        if(selectedDateEntry) {
+            document.getElementById("delete-form-" + selectedDateEntry).submit();
+        }
+    }
+</script>
+
+{% endblock %}

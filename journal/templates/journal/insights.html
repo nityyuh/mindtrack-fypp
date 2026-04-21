@@ -1,0 +1,70 @@
+{% extends "journal/base.html" %}
+
+{% block content %}
+
+<h2> insights 📊 </h2>
+
+<div class="card">
+    <h3> mood trend </h3>
+    <div class="chart-container">
+        <canvas id="moodChart"></canvas>
+    </div>
+</div>
+<div class="card">
+    <h3> your weekly summary </h3>
+    <p> entries: {{entry_count}}</p>
+    <p> negative moods: {{negative_count }}</p>
+    <p> deadlines: {{ deadline_count }} </p>
+    <p> <strong> {{ insight_text }}</strong></p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+ <script>
+    const ctx = document.getElementById('moodChart').getContext('2d');
+
+    const moodChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ chart_labels | safe }},
+            datasets: [{
+                label: 'mood',
+                data: {{ chart_data | safe }},
+                tension: 0.4,
+                fill: true,
+                borderColor: '#f4a6c1',
+                backgroundColor: 'rgba(244,166,193,0.2)',
+                pointBackgroundColor: '#f4a6c1',
+                pointBorderColor: '#fff',
+                pointRadius:4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    ticks: {
+                        callback: function(value){
+                            if(value === 3) return "😚";
+                            if(value === 2) return "😐";
+                            if(value === 1) return "😞";
+                        },
+                        stepSize:1,
+                        min: 1,
+                        max: 3,
+                    },
+                    grid: {
+                        color: 'rgba(0,0,0,0.05)'
+                    }
+                },
+                x : {
+                    grid : {
+                        color: 'rgba(0,0,0,0,03)'
+                    }
+                }
+            }
+        }
+    });
+ </script>
+
+ {% endblock %}

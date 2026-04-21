@@ -1,77 +1,82 @@
-{% load static %}
-<!DOCTYPE html>
-<html>
-<head>
-    <title> my dashboard </title>
-    <link rel="stylesheet" href="{%static 'journal/style.css' %}">
-</head>
-<body class="{% if user.is_authenticated %}{{ user.profile.theme }}{% else %}light{% endif %}">
+{% extends "journal/base.html" %}
+{% block title %} dashboard {% endblock %}
+{% block content %}
 
-<div class="page">
-    <nav class="navbar">
-        <div class="nav-left">
-            <span class="brand"> mindtrack </span>
-        </div>
-        <div class="nav-right">
-            <a class="nav-link" href="{% url 'dashboard' %}"> my dashboard </a>
-            <a class="nav-link" href="{% url 'create_entry' %}"> new entry </a>
-            <a class="nav-icon" href="{% url 'settings' %}" title="settings"> ⚙️ </a>
-            <a class="nav-link" href="{% url 'logout' %}"> logout </a>
-        </div>
-    </nav>
-<div class="page-center">
-<div class="container">
-    <div class="dash-header">
-        <div>
-            <h2> welcome, {{ request.user.username }} 👋 </h2>
-            <p class="subtitle"> track your mood and manage academic
-                stress in one place
-            </p>
-        </div>
-        <a href="{% url 'create_entry' %}"><button class="btn"> new journal entry </button></a>
-        </div>
+<h2 class="welcome-text"> welcome, {{ request.user.username }} 👋 </h2>
 
-        <div class="cards">
-            <div class="card">
-                <h3> your theme </h3>
-                <p class="pill"> {{ user.profile.theme | title }} </p>
-                <p class="muted"> you can change this in settings </p>
-            </div>
-            <div class="card">
-                <h3> latest sentiment </h3>
-                {% if entries %}
-                <p class="pill">{{ entries.0.sentiment_label|default:"N/A"|title }}</p>
-                <p class="muted">Score: {{ entries.0.sentiment_score|default:"-" }}</p>
-                {% else %}
-                <p class="muted"> no entries yet </p>
-                {% endif %}
-            </div>
-            <div class="card">
-                <h3> stress prediction </h3>
-                <p class="muted"> coming next: deadline-based stress score </p>
-            </div>
-        </div>
+<div class="dashboard-grid">
 
-        <h3 class="section-title"> recent entries </h3>
+    {% if show_reminder %}
+    <div class="reminder-banner">
+        <p> you haven't journaled today, take a moment for yourself </p>
+    </div>
+    {% endif %}
 
-        {% if entries %}
-        <ul class="entry-list">
-            {% for entry in entries %}
-            <li class="entry">
-                <div class="entry-top">
-                    <span class="entry-date"> {{entry.created_at}} </span>
-                    <span class="entry-sentiment"> {{entry.sentiment_label | title }}({{entry.sentiment_score}})</span>
-                </div>
-                <div class="entry-content"> {{entry.content}}</div>
-            </li>
-            {% endfor %}
-        </ul>
-        {% else %}
-        <p class="muted"> no entries yet. create your first entry to see sentiment feedback </p>
-        {% endif %}
+
+    <div class="card">
+        <h3> new entry 💌 </h3>
+        <p> write about your day and track your emotions </p>
+        <a href="{% url 'create_entry' %}">
+            <button class="btn"> create entry </button>
+        </a>
+    </div>
+
+     <div class="card">
+        <h3> deadlines 📅 </h3>
+        <p> add upcoming deadlines or exam dates to track stress levels </p>
+        <a href="{% url 'deadlines' %}"> 
+            <button class="btn secondary"> view deadlines</button>
+        </a>
+     </div>
+</div>
+
+<div class="stress-banner {{ stress_level }}">
+    <h3> stress level 🫧 </h3>
+    <p class="stress-main"> {{ stress_level | title }}</p>
+    {% if stress_level == "high" %}
+    <p class="stress-sub"> deadline is close and your mood is low - take breaks 💓 </p>
+    {% elif stress_level == "medium" %}
+    <p class="stress-sub"> you may be under some pressure - stay organised 🪷 </p>
+    {% else %}
+    <p class="stress-sub"> you're doing so well - keep it up! ✨ </p>
+    {% endif %}
+</div>
+
+<!-- ENTRIES SECTION -->
+ <div class="entries-section">
+    <div class="section-header">
+        <h3> your most recent entries 🪷 </h3>
+        <a href="{% url 'all_entries' %}" class="view-all"> view all entries </a>
+    </div>
     
-</div>
-</div>
-</div>
-</body>
-</html>
+
+    {% if entries %}
+    <div class="entries-grid">
+        {% for entry in entries %}
+        <a href="{% url 'view_entry' entry.id %}" class="entry-link">
+        <div class="entry-card">
+            <strong> {{ entry.created_at }} </strong>
+            <p> {{ entry.content|truncatewords:20 }}</p>
+            <span class="pill">
+                {{ entry.sentiment_label|default:"n/a"|title}}
+                ({{entry.sentiment_score|floatformat:2}})
+                
+            </span>
+        </div>
+        </a>
+        {% endfor %}
+    </div>
+
+
+    {% else %}
+    <p class="empty-text"> no entries yet. start your first journal entry today 🌷</p>
+    {% endif %}
+ </div>
+
+ <div class="dashboard-actions">
+    <p class="subtitle">
+    want a deeper look at your mood?
+    <a href="{% url 'insights' %}"> view your weekly insights </a>
+    </p>
+ </div>
+ {% endblock %}
