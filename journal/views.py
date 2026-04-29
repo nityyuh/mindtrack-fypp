@@ -1,11 +1,11 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import update_session_auth_hash
 from django.contrib import messages
 from django.contrib.auth import login
 from django.utils import timezone
-from urllib3 import request
 from .forms import JournalEntryForm, RegisterForm, DeadlineForm
 from .sentiment import analyse_sentiment
 from .models import JournalEntry, Profile, Deadline
@@ -208,10 +208,16 @@ def settings (request):
             request.user.profile.save()
 
         reminder = request.POST.get('reminder')
-        profile.reminder_enable = True if reminder == 'on' else False
+        profile.reminder_enabled = True if reminder == 'on' else False
 
         username = request.POST.get('username')
         email = request.POST.get('email')
+
+        if username:
+            if User.objects.filter(username=username).exclude(id=user.id).exists():
+                messages.error(request, "this username is already taken")
+                return redirect('settings')
+            user.username = username
 
         if username:
             user.username = username

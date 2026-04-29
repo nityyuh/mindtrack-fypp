@@ -24,7 +24,7 @@ class Deadline(models.Model):
 
 
 class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    
 
     THEME_CHOICES = [
         ('light','☁️ daylight'),
